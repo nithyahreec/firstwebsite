@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Valentine Card 💖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CANVAS + PDF LIBS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #ffd1dc, #ffb6c1);
+}
+
+/* Falling hearts + glitter */
+.heart, .glitter {
+  position: fixed;
+  top: -10px;
+  pointer-events: none;
+}
+
+.heart {
+  font-size: 20px;
+  animation: fall linear infinite;
+}
+
+.glitter {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #fff, #ff69b4);
+  border-radius: 50%;
+  animation: sparkle linear infinite;
+}
+
+@keyframes fall {
+  to { transform: translateY(110vh); opacity: 0; }
+}
+
+@keyframes sparkle {
+  to { transform: translateY(110vh) scale(0); opacity: 0; }
+}
+
+/* Main container */
+.story {
+  position: relative;
+  background: #fff0f5;
+  width: 92%;
+  max-width: 420px;
+  height: 85vh;
+  border-radius: 25px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  padding: 25px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.big-heart {
+  font-size: 70px;
+  animation: beat 1s infinite;
+}
+
+@keyframes beat {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+/* 🔴➡️🟢 COLOR CHANGED HERE */
+h1, h2 { color: #2ecc71; }
+
+p { color: #555; font-size: 17px; }
+
+button {
+  margin-top: 15px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 30px;
+  background: #ff4d6d;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.no-btn {
+  background: #aaa;
+  position: absolute;
+}
+
+input, textarea {
+  width: 90%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 15px;
+  border: 1px solid #ccc;
+  text-align: center;
+  font-size: 16px;
+}
+
+textarea {
+  resize: none;
+  height: 80px;
+}
+
+/* Valentine Card */
+.card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffc0cb, #ffe4e1);
+  border-radius: 20px;
+  padding: 25px;
+  color: #2ecc71; /* card text also green */
+  box-shadow: inset 0 0 10px rgba(255,255,255,0.7);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Shimmer */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: shimmer 2.5s infinite;
+  border-radius: 20px;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+/* Heart burst */
+@keyframes burst {
+  to {
+    transform: translate(var(--x), var(--y)) scale(0);
+    opacity: 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="story" id="story">
+  <div class="big-heart">💗</div>
+  <h1>Valentine’s Day</h1>
+  <p>Create a cute Valentine card 💌</p>
+  <button onclick="start()">Start ▶️</button>
+</div>
+
+<script>
+let crushName = "";
+
+function start() {
+  story.innerHTML = `
+    <div class="big-heart">💘</div>
+    <h1>Do you have a crush?</h1>
+    <button onclick="askName()">Yes 💕</button>
+    <button class="no-btn" id="no">No 😌</button>
+  `;
+  runAway("no");
+}
+
+function askName() {
+  story.innerHTML = `
+    <div class="big-heart">😍</div>
+    <h1>Crush Name</h1>
+    <input id="name" placeholder="Enter name 💖">
+    <button onclick="askMsg()">Next 💌</button>
+  `;
+}
+
+function askMsg() {
+  crushName = document.getElementById("name").value.trim();
+  if (!crushName) return alert("Enter a name 💕");
+
+  story.innerHTML = `
+    <div class="big-heart">✍️</div>
+    <h1>Message</h1>
+    <textarea id="msg" placeholder="Write something cute 💖"></textarea>
+    <button onclick="showCard()">Create Card 💝</button>
+  `;
+}
+
+function showCard() {
+  const msg = document.getElementById("msg").value.trim() ||
+              "You make my world brighter every day 💖";
+
+  story.innerHTML = `
+    <div id="valCard" class="card">
+      <div class="big-heart">💗</div>
+      <h2>Dear ${crushName},</h2>
+      <p>${msg}</p>
+      <h2>💘 Happy Valentine’s Day 💘</h2>
+    </div>
+    <button onclick="downloadPDF()">Download PDF 📄</button>
+    <button onclick="location.reload()">Make Another 🔄</button>
+  `;
+}
+
+function runAway(id) {
+  const btn = document.getElementById(id);
+  btn.addEventListener("mouseover", () => {
+    btn.style.transform =
+      `translate(${Math.random()*200-100}px, ${Math.random()*200-100}px)`;
+  });
+}
+
+function downloadPDF() {
+  const card = document.getElementById("valCard");
+  const { jsPDF } = window.jspdf;
+
+  html2canvas(card, { scale: 2 }).then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = 210;
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 20, pdfWidth, pdfHeight);
+    pdf.save("Valentine_Card.pdf");
+  });
+}
+</script>
+
+</body>
+</html>
